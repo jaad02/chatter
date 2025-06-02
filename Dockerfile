@@ -1,12 +1,9 @@
-# Usamos la imagen oficial de OpenJDK 17 slim
-FROM openjdk:17-jdk-slim
-
-# Directorio de trabajo dentro del contenedor
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
 
-# Copiamos el JAR compilado (asegúrate de que el nombre del JAR coincida)
-COPY target/apiRest-0.0.1-SNAPSHOT.jar app.jar
-
-# Ejecutamos la app con el perfil 'prod'
+FROM openjdk:17-jdk-slim
+WORKDIR /app
+COPY --from=build /app/target/apiRest-0.0.1-SNAPSHOT.jar app.jar
 ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=prod"]
-
